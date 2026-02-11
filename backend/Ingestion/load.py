@@ -1,4 +1,4 @@
-from langchain_community.document_loaders import PyMuPDFLoader
+from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from backend.vector_database.vector_store import vector_db
 from dotenv import load_dotenv
@@ -13,7 +13,7 @@ class data_loader:
 
     def load(self):
 
-        document_object = PyMuPDFLoader(self.path)
+        document_object = PyPDFLoader(self.path)
 
         documents = document_object.load()
 
@@ -25,13 +25,6 @@ class data_loader:
 
         vector_db().ingest(chunks)
 
+        return "Document uploaded successfully"
+
         
-
-    
-
-path = "backend/Data/Agentic_AI_Toochains.pdf"
-loader_obj = data_loader(path=path)
-
-## load data
-
-loader_obj.load()

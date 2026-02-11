@@ -1,21 +1,14 @@
-from backend.graph.app import AgentGraph
-from backend.state.agent_state import AgentState
+from backend.Api_endpoint import router as query_router
+from fastapi import FastAPI
 
 
-def state_respons(state:AgentState):
+app = FastAPI(
+    title="Multi-Agent-System",
+    version="1.0.0",
+    description="Multi-agent backend for document ingestion and intelligent querying"
+)
 
-    for key,value in state.items():
-        print(f"{key}--: {value}")
-    
 
-if __name__ == "__main__":
+app.include_router(query_router)
 
-    workflow = AgentGraph().final_workflow()
 
-    output = workflow.invoke({'question':"Status of order with orderid PC12345","user_id":"3"})
-
-    # print(output)
-
-    state_respons(output)
-    
-    

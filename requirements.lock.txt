@@ -1,0 +1,26 @@
+# --- Core API ---
+fastapi
+uvicorn
+python-multipart
+python-dotenv
+
+# --- LangChain / Agents ---
+langchain
+langgraph
+langchain-community
+langchain-unstructured
+langchain-huggingface
+langchain-pinecone
+langchain-groq
+
+# --- Vector DB ---
+pinecone-client
+
+# --- Embeddings ---
+sentence-transformers
+
+# --- PDF processing ---
+pypdf
+
+# --- Database ---
+psycopg2-binary

@@ -9,4 +9,4 @@ class AgentState(TypedDict,total=False):
     order_id : str
     sql_query : str
     db_result : dict | None
-    missing : Optional[List[str]]
+    order_id_required : bool

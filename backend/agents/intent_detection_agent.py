@@ -12,51 +12,103 @@ class Intent:
 
     def intent_agent(self,state:AgentState):
 
-        messages = [SystemMessage(
-            content="""
-        You are a strict Intent classification engine.
-        
-        Critical Rule:
-        
-        -Only classify as ORDER if the user message clearly refers to a specific, user-owned order or payment.
-        -If a message implies an order-related issue (e.g delivery delay) but does not include an order ID, you may still classify it as ORDER, but confidence should be below 0.85 
-        -If there is any doubt , choose HUMAN
+        messages = [
+    SystemMessage(
+        content="""
+You are a strict Intent Classification Engine.
 
-        Intent definitions:
-            - ORDER: Mentions a specific order, transaction, payment, shipment, or personal ownership (e.g., "my order", order ID, tracking, payment made).
-            - POLICY: Asks about rules, terms, eligibility, or general policies without referring to a specific order.
-            - HUMAN: General questions, hypothetical cases, or unclear intent.
-                       
-        Output format (JSON Only):
-        {
-        "intent":ORDER | POLICY | HUMAN,
-        "confidence": number between 0.0 and 1.0
-        }
+CRITICAL RULES (Follow strictly):
 
-        Confidence guidelines:
-        - 0.9–1.0: Explicit ownership or order ID
-        - 0.7–0.85: Clear ownership but no ID
-        - <0.6: Ambiguous or hypothetical
+- Classify as ORDER only if the user message clearly refers to the user's own order(s),
+  including order status, delivery, shipment, payment, or order history.
+- Order ID is NOT mandatory for ORDER intent if the query refers to
+  aggregated or personal order information (e.g., "my orders", "pending orders").
+- If a message implies an order-related issue (e.g., delay, failure) but does not
+  clearly establish ownership, classify as ORDER with confidence below 0.85.
+- If there is ANY doubt or ambiguity, choose HUMAN.
 
-        Do not answer the user.
-        Do not explain reasoning.
-        """),
-       
-       HumanMessage(content=state['question'])
-        ]
+--------------------------------
+FILTERED HIGH-COVERAGE EXAMPLES
+--------------------------------
+
+HUMAN:
+"Hi, I just want to understand what kind of help you provide."
+"I’m not looking for anything specific, just need some guidance."
+"Can you explain how things usually work here?"
+
+ORDER:
+"What is the status of my order 556677?"
+"How many of my orders are pending or failed?"
+"Can you give me a summary of my recent orders?"
+"One of my orders seems delayed, can you check?"
+
+POLICY:
+"What is your refund policy if an order fails?"
+"What does your policy say about delayed deliveries?"
+"Can you explain the cancellation or return policy?"
+
+--------------------------------
+INTENT DEFINITIONS
+--------------------------------
+
+- ORDER:
+  Mentions a specific order, multiple personal orders, transaction, payment,
+  shipment, delivery status, or personal ownership (e.g., "my order",
+  "my orders", order ID, tracking, payment made).
+
+- POLICY:
+  Asks about rules, terms, eligibility, refunds, cancellations, returns,
+  or compensation WITHOUT referring to a specific personal order.
+
+- HUMAN:
+  General questions, greetings, exploration, vague requests,
+  or unclear intent.
+
+--------------------------------
+ORDER ID REQUIREMENT LOGIC
+--------------------------------
+
+- Analyze the message and decide whether an order_id_required is False | True.
+- If the query can be answered using user context or aggregated data,
+  set "order_id_required": false.
+- If a specific order must be identified or order id given in query then, set "order_id_required": true.
+
+--------------------------------
+OUTPUT FORMAT (JSON ONLY)
+--------------------------------
+
+{
+  "intent": "ORDER" | "POLICY" | "HUMAN",
+  "confidence": number between 0.0 and 1.0,
+  "order_id_required": true | false
+}
+
+--------------------------------
+CONFIDENCE GUIDELINES
+--------------------------------
+
+- 0.90 – 1.00 → Explicit ownership or order ID present
+- 0.70 – 0.85 → Clear personal order context, no ID
+- < 0.60     → Ambiguous, vague, or hypothetical
+
+--------------------------------
+STRICT RULES
+--------------------------------
+
+- Do NOT answer the user.
+- Do NOT explain reasoning.
+- Output JSON ONLY.
+"""
+    ),
+    HumanMessage(content=state["question"])
+]
+
 
         ## Invoking model with above question
 
         model_output = self.model.invoke(messages).content
 
-        # print("User Question:" , state['question'])
-
-        #print("Intent detected: ",model_output)
-
-        #state["intent"] = model_output["intent"]
-
-        ## converting output json-string into Pure json
-        
+      
         try:
             result = json.loads(model_output)
 
@@ -64,39 +116,12 @@ class Intent:
             result = {"intent":"HUMAN","confidence":0.0}
 
         intent = result.get("intent","HUMAN")
+        order_id_required = result.get("order_id_required","False")
         
+
         #state["intent"] = intent
         return {
-            "intent":intent
+            "intent":intent,
+            "order_id_required":order_id_required
         }
-
-
-
-
-# ## Calling method for testing
-
-# intent_obj = Intent()
-
-# ## Ask query
-
-# query = {"My order #458921 hasn’t been delivered yet. Can you check the status":{"intent": "ORDER_QUERY","confidence": "≥ 0.9"},
-#          "What is your return and refund policy for electronic items?":{"intent": "POLICY_QUERY","confidence": "≥ 0.9"},"How long does delivery usually take?":{"intent": "POLICY_QUERY",
-# "confidence": "~0.7 ", "intent": "AMBIGUOUS acceptable"},"I paid yesterday but my order is still showing processing.":{"intent": "ORDER_QUERY",
-# "confidence": "≥ 0.85"},"If I cancel my order now, will I get a full refund?":{"intent": "ORDER_QUERY", "confidence": "~0.7–0.8"},
-# "Hi, I placed an order last Friday (#782341). I got the confirmation email, but since then there’s been no update at all. Can you tell me where it is":{"intent":"order_status"},
-# "I paid using UPI yesterday and the amount was deducted, but my order is still marked as processing. Is something wrong?":{"intent":"order_payment"},"Implicit delivery delay":{"intent":"order"},
-# "I placed two orders on Monday, canceled one on Tuesday, but today I got a shipment message. Which order is this for?":{"intent":"ORDER_TRACKING ORDER_CANCELLATION_VERIFICATION"},
-# "Your policy says refunds take 5–7 days, but my last refund took 12. My current order is canceled—should I expect the same delay?":{"intent":"REFUND_STATUS POLICY_EXCEPTIONORDER_CANCELLATION_CONFIRMED"}}
-                                                                                                                              
-
-# i = 0
-# for key,val in query.items():
-#     print(f"Agent answer of question {i} -----\n",intent_obj.intent_agent({"question":key}))
-    
-
-#     print(f"Actual answer of {i} question\n",val)
-
-#     i+=1
-          
-
 

@@ -22,18 +22,32 @@ class intent_validator:
             
         order_id = intent_validator.has_order_id(state['question'])
 
-        print("order_type",type(order_id))
-        print("Order id",order_id)
-        if not order_id:
+        if state['intent'] == 'ORDER' and state['order_id_required']:
+            print("order_type",type(order_id))
+            print("Order id",order_id)
+            if not order_id:
+                    return {}
+                
+            if 'user_id' not in state:
+                return{
+                    "order_id":order_id
+                }
+            
+            return {   
+                    'user_id': state['user_id'], 
+                    'order_id':order_id
+                    }
+        
+        if state['intent'] == 'ORDER' and not state['order_id_required']:
+             
+            if 'user_id' not in state:
                 return {}
             
-        if 'user_id' not in state:
-            return{
-                  "order_id":order_id
-            }
-        
-        return {   
-                'user_id': state['user_id'], 
-                'order_id':order_id
+            else:
+                return{
+                    'user_id': state['user_id']
                 }
+
+            
+             
 

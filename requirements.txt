@@ -1,7 +1,7 @@
 langchain
 langgraph
 langchain-groq
-dotenv
+python-dotenv
 pinecone
 pdfreader
 fastapi
@@ -12,3 +12,4 @@ langchain-community
 langchain_huggingface
 langchain-pinecone
 sentence-transformers
+python-multipart
