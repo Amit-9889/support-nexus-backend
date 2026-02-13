@@ -1,11 +1,11 @@
-# 🚀 Support Nexus – Backend
+## 🚀 Support Nexus – Backend
 
       The backend leverages LangGraph to orchestrate a stateful, 
       graph-driven multi-agent workflow for intelligent customer support automation.
 
 Support Nexus Backend is built using FastAPI and LangGraph to handle intelligent query routing, multi-agent coordination, and retrieval-augmented generation (RAG).
 
-**🧠 System Overview**
+## 🧠 System Overview
 
       This backend implements a modular, graph-based AI architecture that enables:
 
@@ -21,23 +21,27 @@ Support Nexus Backend is built using FastAPI and LangGraph to handle intelligent
 
 Unlike traditional request-response APIs, this system uses a stateful execution graph to manage control flow and agent coordination.
 
+
+
+## 🏗️ System Architecture
+
+```mermaid
 flowchart TD
-    A[User] --> B[FastAPI Backend]
+    A[User] --> B[FastAPI]
+    B --> C[LangGraph Intent Node]
 
-    B --> C[Orchestrator Layer<br/>- Intent Detection<br/>- Agent Selection]
+    C -->|POLICY| D[Policy Agent - RAG]
+    C -->|ORDER| E[Order Agent]
+    C -->|GENERAL| F[General Agent - Escalation]
 
-    C --> D[Policy Agent]
-    C --> E[Order Agent]
-    C --> F[General Agent]
-
-    D --> G[Vector Database<br/>(Embeddings Storage)]
+    D --> G[Response]
     E --> G
     F --> G
+```
 
-    G --> H[Background Ingestion<br/>(PDF → Chunk → Embed)]
 
 
-**Execution Pipeline**
+## 🔁 Execution Pipeline
 
       1.Request received via FastAPI endpoint
 
@@ -55,7 +59,10 @@ flowchart TD
 
       8.Final structured state returned
       
-**📂 Project Structure**
+## 📂 Project Structure
+
+
+
       backend/
       │
       ├── Api_endpoint/         # FastAPI route definitions
@@ -76,9 +83,10 @@ flowchart TD
       ├── requirements.txt
       └── README.md
 
-**🤖 Multi-Agent Design**
 
-**Agent	Responsibility**
+## 🤖 Multi-Agent Design
+
+**Agent Responsibility**
 
       Policy Agent --->	Handles policy-related queries
       Order Agent	---> Handles order-specific queries
@@ -88,7 +96,7 @@ flowchart TD
 
       This modular design allows easy extension with new agents.
 
-**📄 Document Ingestion Pipeline (RAG)**
+## 📄 Document Ingestion Pipeline (RAG)
 
 **Upload Flow:**
 
@@ -108,7 +116,7 @@ flowchart TD
 
 This enables context-aware answer generation.
 
-**🔌 API Endpoints**
+## 🔌 API Endpoints
 
       **📌 Query Endpoint**
 
@@ -144,24 +152,27 @@ This enables context-aware answer generation.
 
       4.Triggers asynchronous ingestion
 
-**🛠️ Tech Stack**
+## 🛠️ Tech Stack
 
       FastAPI
+      Langchain
       LangGraph
       Python
       Pydantic
       BackgroundTasks
       Vector Database
       Docker
+      Postgresql
 
-**▶️ Run Locally**
+## ▶️ Run Locally
 
 **1️⃣ Install Dependencies**
+
       pip install -r requirements.txt
 
 **2️⃣ Start Server**
-      uvicorn main:app --reload
 
+      uvicorn main:app --reload
 
 **Backend runs at:**
 
@@ -171,15 +182,18 @@ This enables context-aware answer generation.
 
       http://127.0.0.1:8000/docs
 
-**🐳 Docker Support**
+## 🐳 Docker Support
+
 **Build**
+
       docker build -t support-nexus-backend .
 
 **Run**
+
       docker run -p 8000:8000 support-nexus-backend
 
-**🔗 Related Repository**
+## 🔗 Related Repository
 
 **Frontend Interface:**
 
-      👉 https://github.com/your-username/support-nexus-frontend
+      👉 https://github.com/Amit-9889/support-nexus-frontend/
